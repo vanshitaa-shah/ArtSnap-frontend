@@ -1,4 +1,3 @@
-
 import { readAllData } from "@/lib/indexDb";
 import { Art } from "@/types";
 import { useEffect, useState } from "react";
@@ -14,8 +13,8 @@ export default function useArt(artId: string) {
       try {
         // First try to get from IndexedDB
         const dbArts = await readAllData("arts");
-		
-        const dbArt = dbArts.find((art) => art.id === artId);        
+
+        const dbArt = dbArts.find((art) => art.id === artId);
         if (dbArt) {
           setCurrentArt(dbArt);
         }
@@ -23,15 +22,15 @@ export default function useArt(artId: string) {
         // Then fetch from network
         const url = `${import.meta.env.VITE_DATABASE_URL}/arts/${artId}.json`;
         const response = await fetch(url);
-        
+
         if (response.ok) {
           const networkArt = await response.json();
           setCurrentArt(networkArt);
         }
       } catch (error) {
-        toast({ 
-          title: "Fetch to failed", 
-		  variant: "destructive"
+        toast({
+          title: "Fetch to failed",
+          variant: "destructive",
         });
         setIsError(true);
         console.error(error);

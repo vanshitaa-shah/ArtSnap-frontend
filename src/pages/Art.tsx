@@ -22,6 +22,9 @@ const Art = () => {
     );
   }
 
+  console.log(art);
+  
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">

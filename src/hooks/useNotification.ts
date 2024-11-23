@@ -2,37 +2,47 @@ import { configurePushSub } from "@/lib/swUtils";
 import { useEffect, useState } from "react";
 
 export default function useNotification() {
-	// Initialize permission status with the current Notification.permission value
-	const [permissionStatus, setPermissionStatus] = useState(
-		Notification.permission
-	);
+  // Check if Notification API exists in the browser
+  const isNotificationSupported = "Notification" in window;
 
-	// Update permission status on mount
-	useEffect(() => {
-		setPermissionStatus(Notification.permission);
-	}, []);
+  // Initialize permission status with the current Notification.permission value
+  const [permissionStatus, setPermissionStatus] = useState(
+    isNotificationSupported ? Notification.permission : "denied"
+  );
 
-	// Request notification permission from the user
-	const askForNotificationPermission = async () => {
-		try {
-			// Request permission and update the permission status
-			const permission = await Notification.requestPermission();
-			setPermissionStatus(permission);
-			if (permission !== "granted") {
-				// If permission is not granted, return immediately
-				return;
-			} else {
-				// Otherwise, configure push subscription
-				configurePushSub();
-			}
-		} catch (error) {
-			throw new Error("Failed to request notification permission");
-		}
-	};
+  // Update permission status on mount
+  useEffect(() => {
+    if (isNotificationSupported) {
+      setPermissionStatus(Notification.permission);
+    }
+  }, []);
 
-	// Return an object with permission status and askForNotificationPermission function
-	return {
-		permissionStatus: permissionStatus === "granted",
-		askForNotificationPermission,
-	};
+  // Request notification permission from the user
+  const askForNotificationPermission = async () => {
+    if (!isNotificationSupported) {
+      throw new Error("Notifications are not supported in this browser");
+    }
+
+    try {
+      // Request permission and update the permission status
+      const permission = await Notification.requestPermission();
+      setPermissionStatus(permission);
+      if (permission !== "granted") {
+        // If permission is not granted, return immediately
+        return;
+      } else {
+        // Otherwise, configure push subscription
+        configurePushSub();
+      }
+    } catch (error) {
+      throw new Error("Failed to request notification permission");
+    }
+  };
+
+  // Return an object with permission status and askForNotificationPermission function
+  return {
+    permissionStatus: isNotificationSupported && permissionStatus === "granted",
+    askForNotificationPermission,
+    isSupported: isNotificationSupported,
+  };
 }
